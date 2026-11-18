@@ -1,0 +1,149 @@
+{% load static price_format %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8f5">
+  <meta name="description" content="Kerakli asbob-uskunalarni qulay narxda ijaraga oling.">
+  <title>Asbob ijarasi — Kerakli jihoz, kerakli vaqtda</title>
+  <link rel="stylesheet" href="{% static 'rentals/style.css' %}">
+</head>
+<body data-open-rental="{% if rental_tool %}true{% else %}false{% endif %}">
+  <div class="page-shell">
+    <nav class="topbar" aria-label="Asosiy navigatsiya">
+      <a class="brand" href="{% url 'catalog' %}" aria-label="Asbob ijarasi — bosh sahifa">
+        <span class="brand-mark" aria-hidden="true">a.</span>
+        <span>asbob<span class="brand-light">.uz</span></span>
+      </a>
+      <a class="nav-link" href="#catalog">Katalog</a>
+      <a class="nav-contact" href="#catalog"><span aria-hidden="true">↗</span> Jihoz tanlash</a>
+    </nav>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> ISHONCHLI IJARA XIZMATI</div>
+          <h1 id="hero-title">Kerakli jihoz.<br><span>Kerakli vaqtda.</span></h1>
+          <p>Bir kunlik ishingiz uchun qimmat asbob sotib olmang. Keraklisini tanlang, muddatni belgilang — qolganini biz hal qilamiz.</p>
+          <a class="hero-cta" href="#catalog">Katalogni ko'rish <span aria-hidden="true">↓</span></a>
+          <div class="hero-note"><span class="note-check" aria-hidden="true">✓</span> Ortiqcha xarajatlarsiz, sodda ijara</div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-orbit orbit-one"></div>
+          <div class="art-orbit orbit-two"></div>
+          <div class="art-sun"></div>
+          <div class="art-tool">🛠️</div>
+          <div class="art-card art-card-top"><span>✦</span> Ishingiz osonroq</div>
+          <div class="art-card art-card-bottom"><span class="art-check">✓</span><span><strong>6 ta jihoz</strong><small>tanlovingiz uchun</small></span></div>
+          <span class="art-spark spark-one">✳</span>
+          <span class="art-spark spark-two">✦</span>
+        </div>
+      </section>
+
+      <section class="catalog-section" id="catalog" aria-labelledby="catalog-title">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow section-eyebrow">IJARA KATALOGI</div>
+            <h2 id="catalog-title">Nima kerak edi?</h2>
+            <p class="section-subtitle">O'zingizga mos jihozni tanlang — narxlar kunlik hisoblanadi.</p>
+          </div>
+          <label class="search-box">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <span class="visually-hidden">Jihoz qidirish</span>
+            <input id="toolSearch" type="search" placeholder="Jihoz qidirish..." autocomplete="off">
+            <kbd>⌘ K</kbd>
+          </label>
+        </div>
+
+        <div class="filter-row" role="group" aria-label="Jihozlarni toifa bo'yicha filtrlash">
+          <button class="filter-chip is-active" type="button" data-filter="all">Barchasi <span>{{ tools|length }}</span></button>
+          <button class="filter-chip" type="button" data-filter="construction">Qurilish</button>
+          <button class="filter-chip" type="button" data-filter="home">Uy uchun</button>
+          <button class="filter-chip" type="button" data-filter="event">Tadbir</button>
+          <button class="filter-chip" type="button" data-filter="craft">Hunarmandchilik</button>
+        </div>
+
+        {% if messages %}
+          <div class="messages" role="status" aria-live="polite">
+            {% for message in messages %}<p class="message">{{ message }}</p>{% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="tool-grid" id="toolsGrid">
+          {% for tool in tools %}
+            <article class="tool-card" data-category="{{ tool.category }}" data-search="{{ tool.name|lower }} {{ tool.description|lower }}">
+              <div class="card-visual visual-{{ tool.category }}">
+                <span class="visual-code">{{ tool.code }}</span>
+                <img
+                  class="product-image"
+                  src="{% static 'rentals/images/' %}{{ tool.code|lower }}.svg"
+                  alt="{{ tool.name }}"
+                  loading="lazy"
+                  decoding="async">
+                <span class="available-tag"><span></span> Mavjud</span>
+              </div>
+              <div class="card-content">
+                <div class="card-category">{{ tool.get_category_display }}</div>
+                <h3>{{ tool.name }}</h3>
+                <p class="card-description">{{ tool.description }}</p>
+                <div class="card-footer">
+                  <div class="price-block"><strong>{{ tool.daily_rate|space_grouped }}</strong><span>so'm / kun</span></div>
+                  <button
+                    class="select-button"
+                    type="button"
+                    data-rent-url="{% url 'create_rental' tool.id %}"
+                    data-tool-name="{{ tool.name }}"
+                    data-tool-code="{{ tool.code }}"
+                    data-tool-description="{{ tool.description }}"
+                    data-tool-price="{{ tool.daily_rate }}">
+                    Tanlash <span aria-hidden="true">↗</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          {% empty %}
+            <p class="empty-state">Hozircha ijara uchun jihozlar mavjud emas.</p>
+          {% endfor %}
+        </div>
+        <p class="no-results hidden" id="noResults">Bu qidiruv bo'yicha jihoz topilmadi.</p>
+      </section>
+
+      <section class="bottom-cta">
+        <div class="bottom-icon" aria-hidden="true">✦</div>
+        <div><h2>Yaxshi ish — to'g'ri asbobdan boshlanadi.</h2><p>Tanlang, ijaraga oling va ishingizni bugunoq boshlang.</p></div>
+        <a href="#catalog">Jihoz tanlash <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+    <footer><a class="brand footer-brand" href="{% url 'catalog' %}"><span class="brand-mark">a.</span><span>asbob<span class="brand-light">.uz</span></span></a><span>© {% now "Y" %} Asbob. Kerakli jihoz, kerakli vaqtda.</span></footer>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+    <section class="rental-modal" role="dialog" aria-modal="true" aria-labelledby="modalToolName" aria-describedby="modalToolDesc">
+      <button class="close-button" id="closeModalBtn" type="button" aria-label="Oynani yopish">×</button>
+      <div class="modal-kicker"><span class="modal-icon" aria-hidden="true">🛠</span><span id="modalToolId"></span></div>
+      <h2 id="modalToolName"></h2>
+      <p class="modal-description" id="modalToolDesc"></p>
+      <div class="modal-rate">Kunlik ijara <strong><span id="modalToolPrice"></span> so'm</strong></div>
+      <form id="rentalForm" method="post">
+        {% csrf_token %}
+        <div class="form-field">
+          <label for="daysInput">Necha kunga kerak?</label>
+          <div class="input-with-suffix"><input id="daysInput" name="days" type="number" min="1" max="7" step="1" value="{% if rental_form %}{{ rental_form.days.value|default:'1' }}{% else %}1{% endif %}" required><span>kun (1–7)</span></div>
+          {% if rental_form.days.errors %}<p class="field-error">{{ rental_form.days.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="form-field">
+          <label for="nameInput">Ismingiz</label>
+          <input id="nameInput" name="customer_name" type="text" maxlength="100" placeholder="Masalan, Jasur" autocomplete="name" value="{% if rental_form %}{{ rental_form.customer_name.value|default:'' }}{% endif %}" required>
+          {% if rental_form.customer_name.errors %}<p class="field-error">{{ rental_form.customer_name.errors.0 }}</p>{% endif %}
+        </div>
+        {% if rental_form.non_field_errors %}<p class="field-error">{{ rental_form.non_field_errors.0 }}</p>{% endif %}
+        <div class="total-row"><span>Jami to'lov</span><strong><span id="totalPrice">0</span> <small>so'm</small></strong></div>
+        <button class="submit-button" type="submit">Ijara so'rovini yuborish <span aria-hidden="true">→</span></button>
+        <p class="form-footnote"><span aria-hidden="true">🔒</span> Ma'lumotlaringiz faqat so'rov uchun ishlatiladi.</p>
+      </form>
+    </section>
+  </div>
+  <script src="{% static 'rentals/app.js' %}" defer></script>
+</body>
+</html>
